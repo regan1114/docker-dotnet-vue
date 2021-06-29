@@ -1,0 +1,30 @@
+version: "3"
+services:
+  web:
+    container_name: vue_net5
+    restart: always
+    build:
+      context: ./VueNet5
+      dockerfile: Dockerfile
+    depends_on:
+      # 先由名稱db的container啟動
+      - db
+    ports:
+      # (HOST:CONTAINER)
+      - "8001:80"
+  db:
+    container_name: mariadb
+    build:
+      context: ./mariadb
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_ROOT_HOST=%
+    ports:
+      # (HOST:CONTAINER)
+      - "3306:3306"
+    volumes:
+      - ./data:/var/lib/mysql      
+      - ./mariadb/init:/docker-entrypoint-initdb.d/
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
