@@ -22,7 +22,7 @@ namespace VueNet5.Controllers
 
         [AllowAnonymous]
         [HttpPost("login")]
-        public IActionResult login(AuthenticateRequest model)
+        public IActionResult Login(AuthenticateRequest model)
         {
             var response = _userService.login(model, ipAddress());
             setTokenCookie(response.RefreshToken);
@@ -63,10 +63,9 @@ namespace VueNet5.Controllers
         private string ipAddress()
         {
             // get source ip address for the current request
-            if (Request.Headers.ContainsKey("X-Forwarded-For"))
-                return Request.Headers["X-Forwarded-For"];
-            else
-                return HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
+            return Request.Headers.ContainsKey("X-Forwarded-For") ?
+                Request.Headers["X-Forwarded-For"] :
+                HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
         }
     }
 }

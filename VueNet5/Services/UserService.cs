@@ -14,8 +14,6 @@ namespace VueNet5.Services
     public interface IUserService
     {
         AuthenticateResponse login(AuthenticateRequest model, string ipAddress);
-        // AuthenticateResponse RefreshToken(string token, string ipAddress);
-        // void RevokeToken(string token, string ipAddress);
         List<UserModel> GetAll();
         UserModel GetById(int id);
     }
@@ -46,87 +44,60 @@ namespace VueNet5.Services
 
         public List<UserModel> GetAll()
         {
-            using (var connection = DBContext.MySqlConnection())
-            {
-                var sqlStr = "SELECT * FROM users";
+            using var connection = DBContext.MySqlConnection();
+            var sqlStr = "SELECT * FROM users";
 
-                return connection.Query<UserModel>(sqlStr).ToList();
-            }
-        }
-
-        private RefreshToken rotateRefreshToken(RefreshToken refreshToken, string ipAddress)
-        {
-            var newRefreshToken = _jwtUtils.GenerateRefreshToken(ipAddress);
-            revokeRefreshToken(refreshToken, ipAddress, "Replaced by new token", newRefreshToken.Token);
-            return newRefreshToken;
-        }
-
-        private void revokeRefreshToken(RefreshToken token, string ipAddress, string reason = null, string replacedByToken = null)
-        {
-            token.Revoked = DateTime.UtcNow;
-            token.RevokedByIp = ipAddress;
-            token.ReasonRevoked = reason;
-            token.ReplacedByToken = replacedByToken;
+            return connection.Query<UserModel>(sqlStr).ToList();
         }
 
         public UserModel GetById(int id)
         {
-            using (var connection = DBContext.MySqlConnection())
-            {
-                var sqlStr = "SELECT * FROM users";                
-                sqlStr += " WHERE id = @id";
+            using var connection = DBContext.MySqlConnection();
+            var sqlStr = "SELECT * FROM users";
+            sqlStr += " WHERE id = @id";
 
-                return connection.Query<UserModel>(sqlStr, new
-                {
-                    id = id
-                }).FirstOrDefault();
-            }
+            return connection.Query<UserModel>(sqlStr, new
+            {
+                id = id
+            }).FirstOrDefault();
         }
 
         private UserModel QueryUserInfo(AuthenticateRequest model)
         {
-            using (var connection = DBContext.MySqlConnection())
-            {
-                var sqlStr = "SELECT * FROM users";                
-                sqlStr += " WHERE username = @username AND password = @password";
+            using var connection = DBContext.MySqlConnection();
+            var sqlStr = "SELECT * FROM users";
+            sqlStr += " WHERE username = @username AND password = @password";
 
-                return connection.Query<UserModel>(sqlStr, new
-                {
-                    username = model.Username,
-                    password = model.Password.ToMD5()
-                }).FirstOrDefault();
-            }
+            return connection.Query<UserModel>(sqlStr, new
+            {
+                username = model.Username,
+                password = model.Password.ToMD5()
+            }).FirstOrDefault();
         }
 
-        private bool UpdateUserToken(UserModel user) 
+        private void UpdateUserToken(UserModel user) 
         {
-            using (var connection = DBContext.MySqlConnection())
-            {
-                var sqlStr = "UPDATE users SET token=@token";                
-                sqlStr += " WHERE id = @id";
-                
-                var pas = new DynamicParameters();
-                pas.Add("token",user.token);
-                pas.Add("id",user.Id);
-                var tuple = ExecuteSql(sqlStr, pas);
-                return tuple.Item1 == 1;
-            }
+            using var connection = DBContext.MySqlConnection();
+            var sqlStr = "UPDATE users SET token=@token";
+            sqlStr += " WHERE id = @id";
+
+            var pas = new DynamicParameters();
+            pas.Add("token", user.token);
+            pas.Add("id", user.Id);
+            ExecuteSql(sqlStr, pas);
         }
 
-        private Tuple<int,string> ExecuteSql(string sqlStr, DynamicParameters pas)
+        private void ExecuteSql(string sqlStr, DynamicParameters pas)
         {
-            using (var connection = DBContext.MySqlConnection())
+            using var connection = DBContext.MySqlConnection();
+            try
             {
-                try
-                {
-                    var result = connection.Execute(sqlStr, pas);                    
-                    return Tuple.Create(result, "");
-                }
-                catch (Exception e)
-                {
-                    string message = e.Message;
-                    return Tuple.Create(0, message);
-                }
+                connection.Execute(sqlStr, pas);
+            }
+            catch (Exception e)
+            {
+                string message = string.Format("資料庫錯誤 {0}", e.Message);
+                throw new AppException(message);
             }
         }
     }
