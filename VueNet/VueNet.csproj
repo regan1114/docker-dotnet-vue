@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Dapper" />
+    <None Remove="MySql.Data" />
+    <None Remove="Authorization\" />
+    <None Remove="Services\" />
+    <None Remove="DB\" />
+    <None Remove="VueCliMiddleware" />
+    <None Remove="Microsoft.IdentityModel.Tokens" />
+    <None Remove="Microsoft.EntityFrameworkCore.InMemory" />
+    <None Remove="System.IdentityModel.Tokens.Jwt" />
+    <None Remove="Helpers\" />
+    <None Remove="Newtonsoft.Json" />
+    <None Remove="clientapp\src\router\" />
+    <None Remove="clientapp\src\store\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.0.123" />
+    <PackageReference Include="MySql.Data" Version="8.0.30" />
+    <PackageReference Include="VueCliMiddleware" Version="6.0.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.22.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="6.0.7" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.22.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Authorization\" />
+    <Folder Include="Services\" />
+    <Folder Include="DB\" />
+    <Folder Include="Helpers\" />
+    <Folder Include="clientapp\src\router\" />
+    <Folder Include="clientapp\src\store\" />
+  </ItemGroup>
+</Project>

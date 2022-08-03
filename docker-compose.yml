@@ -1,10 +1,10 @@
 version: "3"
 services:
   web:
-    container_name: vue_net5
+    container_name: vue_net
     restart: always
     build:
-      context: ./VueNet5
+      context: ./VueNet
       dockerfile: Dockerfile
     depends_on:
       # 先由名稱db的container啟動
