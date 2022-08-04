@@ -52,6 +52,7 @@
 </template>
 
 <script setup>
+//採用vue3寫法
 import {ref, reactive } from 'vue'
 import { useAuthStore } from '@/stores';
 

@@ -24,6 +24,7 @@
 </template>
 
 <script>
+//保留vue2寫法
 import moment from "moment";
   export default {
     props:{

@@ -15,6 +15,7 @@
 </template>
 
 <script>
+//保留vue2寫法
 import { TableView } from '@/components';
 import { useUserStore } from '@/stores';
 

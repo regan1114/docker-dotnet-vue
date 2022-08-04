@@ -13,7 +13,6 @@ export const useUserStore = defineStore({
       try {
         this.users = await api.get("users", null);
       } catch (error) {
-        console.log(`error ${JSON.stringify(error)}`)
         const alertStore = useAlertStore();
         alertStore.error(error);          
       }

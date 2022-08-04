@@ -15,7 +15,6 @@ export const useAuthStore = defineStore({
         async login(data) {
             try {
                 const user = await api.post(`users/login`, data);    
-                console.log(`user ${JSON.stringify(user)}`)
                 // update pinia state
                 this.user = user;
                 // store user details and jwt in local storage to keep user logged in between page refreshes
@@ -31,6 +30,25 @@ export const useAuthStore = defineStore({
             this.user = null;
             localStorage.removeItem("user");
             router.push('/login');
+        },
+        async refreshToken(){
+            try{
+                const isNotExist = JSON.stringify(this.user) === JSON.stringify({})
+                if(this.user || isNotExist) {
+                    this.logout();
+                } else {
+                    const data = {token: this.user.token}
+                    const user = await api.post(`users/RefreshToken`, data);  
+                    // update pinia state
+                    this.user = user;
+                    // store user details and jwt in local storage to keep user logged in between page refreshes
+                    localStorage.setItem('user', JSON.stringify(user)); 
+                }
+            } catch (error){
+                const alertStore = useAlertStore();
+                alertStore.error(error);   
+            }
+            
         }
     }
 });

@@ -4,6 +4,7 @@
     </v-alert>
 </template>
 <script setup>
+//採用vue3寫法
 import { watch } from 'vue'
 import { storeToRefs } from 'pinia';
 import { useAlertStore } from '@/stores';
