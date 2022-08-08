@@ -20,10 +20,10 @@ namespace VueNet.Authorization
         {
             var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
             var userId = jwtUtils.ValidateJwtToken(token);
-            if (userId != null)
+            if (userId > 0)
             {
                 // attach user to context on successful jwt validation
-                context.Items["User"] = userService.GetById(userId.Value);
+                context.Items["User"] = userService.GetById(userId);
             }
 
             await _next(context);

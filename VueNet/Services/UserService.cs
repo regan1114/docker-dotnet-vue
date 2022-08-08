@@ -1,23 +1,26 @@
 ﻿using System;
-using Dapper;
 using Microsoft.Extensions.Options;
-using VueNet.Authorization;
+using System.Collections.Generic;
+using System.Linq;
+using Dapper;
 using VueNet.DB;
-using VueNet.Helpers;
 using VueNet.Models;
+using VueNet.Authorization;
+using VueNet.Helpers;
 
 namespace VueNet.Services
 {
     public interface IUserService
     {
-        AuthenticateResponse login(AuthenticateRequest model, string ipAddress);
+        AuthenticateResponse Login(AuthenticateRequest model, string ipAddress);
+        AuthenticateResponse RefreshToken(string token);
         List<UserModel> GetAll();
         UserModel GetById(int id);
     }
 
     public class UserService : IUserService
     {
-        private readonly IJwtUtils _jwtUtils;
+        private IJwtUtils _jwtUtils;
         private readonly AppSettings _appSettings;
         public UserService(IJwtUtils jwtUtils, IOptions<AppSettings> appSettings)
         {
@@ -25,18 +28,31 @@ namespace VueNet.Services
             _appSettings = appSettings.Value;
         }
 
-        public AuthenticateResponse login(AuthenticateRequest model, string ipAddress)
+        public AuthenticateResponse Login(AuthenticateRequest model, string ipAddress)
         {
             var userInfo = QueryUserInfo(model);
 
             if (userInfo == null)
-                return null;
+                throw new AppException("帳號或密碼錯誤");
 
             // authentication successful so generate jwt and refresh tokens
             userInfo.Token = _jwtUtils.GenerateJwtToken(userInfo);
-            var refreshToken = _jwtUtils.GenerateRefreshToken(ipAddress);
+            
             UpdateUserToken(userInfo);
-            return new AuthenticateResponse(userInfo, userInfo.Token, refreshToken.Token);
+            return new AuthenticateResponse(userInfo);
+        }
+
+        public AuthenticateResponse RefreshToken(string token)
+        {
+            var userID = _jwtUtils.DecodeJwtToken(token);
+            if (userID == 0)
+                throw new AppException("驗證失敗");
+
+            var userInfo = GetById(userID);
+
+            userInfo.Token = _jwtUtils.GenerateJwtToken(userInfo);
+            UpdateUserToken(userInfo);
+            return new AuthenticateResponse(userInfo);
         }
 
         public List<UserModel> GetAll()
@@ -53,11 +69,10 @@ namespace VueNet.Services
             var sqlStr = "SELECT * FROM users";
             sqlStr += " WHERE id = @id";
 
-            var user = connection.Query<UserModel>(sqlStr, new
+            return connection.Query<UserModel>(sqlStr, new
             {
                 id = id
             }).FirstOrDefault();
-            return user;
         }
 
         private UserModel QueryUserInfo(AuthenticateRequest model)
@@ -65,13 +80,12 @@ namespace VueNet.Services
             using var connection = DBContext.MySqlConnection();
             var sqlStr = "SELECT * FROM users";
             sqlStr += " WHERE account = @account AND password = @password";
-            var password = model.Password.ToMD5();
-            var info = connection.Query<UserModel>(sqlStr, new
+
+            return connection.Query<UserModel>(sqlStr, new
             {
                 account = model.Account,
-                password = password
+                password = model.Password.ToMD5()
             }).FirstOrDefault();
-            return info;
         }
 
         private void UpdateUserToken(UserModel user)
@@ -82,13 +96,8 @@ namespace VueNet.Services
 
             var pas = new DynamicParameters();
             pas.Add("token", user.Token);
-            pas.Add("id", user.ID);
-            ExecuteSql(sqlStr, pas);
-        }
+            pas.Add("id", user.Id);
 
-        private void ExecuteSql(string sqlStr, DynamicParameters pas)
-        {
-            using var connection = DBContext.MySqlConnection();
             try
             {
                 connection.Execute(sqlStr, pas);
@@ -99,6 +108,6 @@ namespace VueNet.Services
                 throw new AppException(message);
             }
         }
+
     }
 }
-

@@ -3,21 +3,17 @@ using System.Text.Json.Serialization;
 
 namespace VueNet.Models
 {
-    public class AuthenticateResponse
-    {
+	public class AuthenticateResponse
+	{
         public int Id { get; set; }
         public string Username { get; set; }
-        public string JwtToken { get; set; }
+        public string Token { get; set; }
 
-        [JsonIgnore] // refresh token is returned in http only cookie
-        public string RefreshToken { get; set; }
-
-        public AuthenticateResponse(UserModel user, string jwtToken, string refreshToken)
+        public AuthenticateResponse(UserModel user)
         {
-            Id = user.ID;
+            Id = user.Id;
             Username = user.Username;
-            JwtToken = jwtToken;
-            RefreshToken = refreshToken;
+            Token = user.Token;
         }
     }
 }

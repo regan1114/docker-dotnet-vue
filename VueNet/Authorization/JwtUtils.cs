@@ -1,10 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using System;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Text;
 using VueNet.Helpers;
 using VueNet.Models;
@@ -14,8 +11,8 @@ namespace VueNet.Authorization
     public interface IJwtUtils
     {
         public string GenerateJwtToken(UserModel user);
-        public int? ValidateJwtToken(string token);
-        public RefreshToken GenerateRefreshToken(string ipAddress);
+        public int ValidateJwtToken(string token);
+        public int DecodeJwtToken(string token);
     }
 
     public class JwtUtils : IJwtUtils
@@ -35,7 +32,7 @@ namespace VueNet.Authorization
             var expiresDate = _appSettings.RefreshTokenTTL == 0 ? DateTime.UtcNow.AddMinutes(15) : DateTime.UtcNow.AddDays(_appSettings.RefreshTokenTTL);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new[] { new Claim("id", user.ID.ToString()) }),
+                Subject = new ClaimsIdentity(new[] { new Claim("id", user.Id.ToString()) }),
                 Expires = expiresDate,
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
@@ -43,10 +40,10 @@ namespace VueNet.Authorization
             return tokenHandler.WriteToken(token);
         }
 
-        public int? ValidateJwtToken(string token)
+        public int ValidateJwtToken(string token)
         {
             if (token == null)
-                return null;
+                return 0;
 
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
@@ -62,33 +59,22 @@ namespace VueNet.Authorization
                 }, out SecurityToken validatedToken);
 
                 var jwtToken = (JwtSecurityToken)validatedToken;
-                var userId = int.Parse(jwtToken.Claims.First(x => x.Type == "id").Value);
-
+                
                 // return user id from JWT token if validation successful
-                return userId;
+                return int.Parse(jwtToken.Claims.First(x => x.Type == "id").Value);
             }
             catch
             {
                 // return null if validation fails
-                return null;
+                return 0;
             }
         }
 
-        public RefreshToken GenerateRefreshToken(string ipAddress)
+        public int DecodeJwtToken(string token)
         {
-            // generate token that is valid for 7 days
-            using var rngCryptoServiceProvider = new RNGCryptoServiceProvider();
-            var randomBytes = new byte[64];
-            rngCryptoServiceProvider.GetBytes(randomBytes);
-            var refreshToken = new RefreshToken
-            {
-                Token = Convert.ToBase64String(randomBytes),
-                Expires = DateTime.UtcNow.AddDays(7),
-                Created = DateTime.UtcNow,
-                CreatedByIp = ipAddress
-            };
-
-            return refreshToken;
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var jwtToken = tokenHandler.ReadToken(token) as JwtSecurityToken;
+            return int.Parse(jwtToken.Claims.First(x => x.Type == "id").Value);
         }
     }
 }

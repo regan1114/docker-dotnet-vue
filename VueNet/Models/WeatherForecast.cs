@@ -1,7 +1,7 @@
 ﻿using System;
 namespace VueNet.Models
 {
-    public class WeatherForecastModel
+    public class WeatherForecast
     {
         public DateTime Date { get; set; }
 

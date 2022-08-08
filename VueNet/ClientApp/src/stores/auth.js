@@ -15,10 +15,7 @@ export const useAuthStore = defineStore({
         async login(data) {
             try {
                 const user = await api.post(`users/login`, data);    
-                // update pinia state
-                this.user = user;
-                // store user details and jwt in local storage to keep user logged in between page refreshes
-                localStorage.setItem('user', JSON.stringify(user));
+                this.setUserInfo(user)
                 // redirect to previous url or default to home page
                 router.push(this.returnUrl || '/');
             } catch (error) {
@@ -32,23 +29,22 @@ export const useAuthStore = defineStore({
             router.push('/login');
         },
         async refreshToken(){
-            try{
-                const isNotExist = JSON.stringify(this.user) === JSON.stringify({})
-                if(this.user || isNotExist) {
-                    this.logout();
-                } else {
-                    const data = {token: this.user.token}
-                    const user = await api.post(`users/RefreshToken`, data);  
-                    // update pinia state
-                    this.user = user;
-                    // store user details and jwt in local storage to keep user logged in between page refreshes
-                    localStorage.setItem('user', JSON.stringify(user)); 
-                }
-            } catch (error){
-                const alertStore = useAlertStore();
-                alertStore.error(error);   
-            }
-            
+          const isNotExist = JSON.stringify(this.user) === JSON.stringify({})
+          console.log(`refreshToken ${JSON.stringify(this.user) } isNotExist ${isNotExist}`)
+          if(!this.user || isNotExist) {
+            this.logout();
+          } else {
+            const data = {token: this.user.token}
+            const user = await api.post(`users/RefreshToken`, data);  
+            this.setUserInfo(user)
+            router.go(router.currentRoute)
+          }
+        },
+        setUserInfo(user){
+          // update pinia state
+          this.user = user;
+          // store user details and jwt in local storage to keep user logged in between page refreshes
+          localStorage.setItem('user', JSON.stringify(user)); 
         }
     }
 });

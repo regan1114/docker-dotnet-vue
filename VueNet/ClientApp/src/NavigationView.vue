@@ -68,7 +68,7 @@ export default {
       const authStore = useAuthStore();
       const isNotExist = JSON.stringify(authStore.user) === JSON.stringify({})
       let list = JSON.parse(JSON.stringify(this.items))
-      if (authStore.user === null || isNotExist) {
+      if (!authStore.user || isNotExist) {
         return list.filter(m => !m.verification)
       } else {
         list.push({ title: "登出", icon: "mdi-logout", path: "logout"});

@@ -1,1 +1,10 @@
 VueNet/bin
+VueNet/.vs
+VueNet/.vs
+VueNet/ClientApp/node_modules
+VueNet/ClientApp/src/.DS_Store
+VueNet/ClientApp/src/.DS_Store
+VueNet/ClientApp/node_modules
+VueNet/bin
+.DS_Store
+VueNet/.vs

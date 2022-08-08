@@ -9,13 +9,13 @@ namespace VueNet.DB
         {
             var option = DBConfigureServices.Configuration.GetSection("DbSettings")
                                                      .Get<DbSettings>();
-            return new MySqlConnection(option.DbContext);
+            return new MySqlConnection(option.DBContext);
         }
     }
 
     public class DBConfigureServices
     {
-        private static IConfiguration? _configuration;
+        private static IConfiguration _configuration;
         public static IConfiguration Configuration
         {
             get

@@ -34,13 +34,8 @@ async function fetchWeatherForecasts() {
   loading.value = true;
   const weatherStore = useWeatherStore();
   await weatherStore.weatherForecast();
-  // this.items = result ? result.data : [];
   items.value = weatherStore.weathers;
-  console.log(`${JSON.stringify(items)}`);
   loading.value = false;
 }
-const loadData = async () => {
-  fetchWeatherForecasts();
-};
-onMounted(loadData);
+onMounted(fetchWeatherForecasts);
 </script>

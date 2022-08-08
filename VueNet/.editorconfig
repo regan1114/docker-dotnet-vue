@@ -3,8 +3,17 @@
 # CS8603: 可能有 Null 參考傳回。
 dotnet_diagnostic.CS8603.severity = none
 
+# CS8618: 退出建構函式時，不可為 Null 的欄位必須包含非 Null 值。請考慮宣告為可為 Null。
+dotnet_diagnostic.CS8618.severity = none
+
 # CS8604: 可能有 Null 參考引數。
 dotnet_diagnostic.CS8604.severity = none
 
+# CS8600: 正在將 Null 常值或可能的 Null 值轉換為不可為 Null 的型別。
+dotnet_diagnostic.CS8600.severity = none
+
 # CS8602: 可能 null 參考的取值 (dereference)。
 dotnet_diagnostic.CS8602.severity = none
+
+# CS8629: 可為 Null 的實值型別可為 Null。
+dotnet_diagnostic.CS8629.severity = none
